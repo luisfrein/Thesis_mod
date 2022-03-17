@@ -102,6 +102,6 @@ model_data_raw %>%
   rename(year = year...2) %>% 
   #Drop redundant columns
   select(-contains(c('country', 'code', '...')),
-         -c(3, 5, 7, 10)) %>% 
+         -c(5, 7, 10)) %>% 
   relocate(entity) %>% 
-  relocate(idh, .before = rule) -> model_data
+  relocate(idh, .before = gdp_growth) -> model_data
