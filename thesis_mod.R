@@ -23,6 +23,8 @@ wgi <- readxl::read_xlsx('wgidataset.xlsx',
 gdp_growth <- read_csv('gdp_growth_rate.csv',
                        skip = 4) 
 
+gdp_pc <- readxl::read_xlsx('WEO_Data.xlsx')
+
 # Internet users wrangle --------------------------------------------------
 
 #Filter the internet_users_raw dataset for the countries we need
@@ -104,4 +106,7 @@ model_data_raw %>%
   select(-contains(c('country', 'code', '...')),
          -c(5, 7, 10)) %>% 
   relocate(entity) %>% 
-  relocate(idh, .before = gdp_growth) -> model_data
+  relocate(idh, .before = gdp_growth) %>% 
+  mutate(entity = as_factor(entity)) -> model_data
+
+write_csv(model_data, 'model_data.csv')
