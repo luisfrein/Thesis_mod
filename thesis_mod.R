@@ -99,6 +99,15 @@ gdp_growth %>%
                values_to = 'gdp_growth') %>% 
   bind_cols(model_data_raw) -> model_data_raw
 
+
+# gdp_pc wrangling --------------------------------------------------------
+gdp_pc %>% 
+  select(-(2:3)) %>% 
+  pivot_longer(2:9, 
+               names_to = 'year', 
+               values_to = 'pcgdp') %>% 
+  bind_cols(model_data_raw) -> model_data_raw
+
 # Finishing touches for model_data_raw ------------------------------------
 model_data_raw %>% 
   rename(year = year...2) %>% 
@@ -109,4 +118,4 @@ model_data_raw %>%
   relocate(idh, .before = gdp_growth) %>% 
   mutate(entity = as_factor(entity)) -> model_data
 
-write_csv(model_data, 'model_data.csv')
+#write_csv(model_data, 'model_data.csv')
