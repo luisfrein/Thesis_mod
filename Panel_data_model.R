@@ -44,6 +44,13 @@ model_data <- readr::read_csv('model_data.csv')
 #   stat_dotsinterval(side = "bottom", scale = 0.7, slab_size = NA,
 #                     fill = '#808A9F') 
 
+# model_data %>%
+#   ggplot(aes(pcgdp)) +
+#   stat_slab(aes(scale = 0.7),
+#             fill = '#808A9F') +
+#   stat_dotsinterval(side = "bottom", scale = 0.7, slab_size = NA,
+#                     fill = '#808A9F')
+
 View(model_data)
 
 
@@ -186,5 +193,121 @@ phtest(fijo_log, aleatorio_log)
 #el p-value es mayor a 5%, no se rechaza la Ho o rechazas la Ha,
 
 #si mi p-value es menor al 5%, entonces se deberia usar efectos fijos
+
+# Models with gdp per capita -----------------------------------------------
+# Fixed effects model -----------------------------------------------------
+fijo_log2 <- plm(log(idh) ~ 
+                  log(individuals_using_the_internet_of_population) + 
+                  log(rule) + 
+                  log(enrollment_rate) + 
+                  log(pcgdp),
+                data = model_data,
+                index = c ("entity","year"), 
+                model = "within")
+#rule and gdp growth have negative values. Using log() introduces NAs.
+#That might reduce the number of observations, thus giving fewer than 30 obs for the model.
+
+fijo2 <- plm(idh ~ 
+              individuals_using_the_internet_of_population + 
+              rule + 
+              enrollment_rate + 
+              pcgdp,
+            data = model_data,
+            index = c ("entity","year"), 
+            model = "within")
+
+#Model results
+broom::tidy(fijo2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#estimates might be too low
+#individuals_using_internet is significant for a p-value < 0.05
+#rule is not significant 
+#enrollment_rate is not significant 
+#pcgdp is significant for a p-value < 0.1
+
+broom::glance(fijo2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#F statistic. Model is significant for a p-value < 0.05
+
+broom::tidy(fijo_log2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#Only individuals_using_internet is significant for a p-value < 0.05
+
+broom::glance(fijo_log2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#F statistic. Model is significant for a p-value < 0.05
+
+#Non tidy model summaries
+summary(fijo_log2)
+summary(fijo2)
+
+
+# Random effects model ----------------------------------------------------
+aleatorio_log2 <- plm(log(idh) ~ 
+                       log(individuals_using_the_internet_of_population) + 
+                       log(rule) + 
+                       log(enrollment_rate) + 
+                       log(pcgdp),
+                     data = model_data,
+                     index = c("entity","year"),
+                     model = "random",
+                     random.method = 'amemiya')
+#rule and gdp growth have negative values. Using log() introduces NAs.
+#That might reduce the number of observations, thus giving fewer than 30 obs for the model.
+
+aleatorio2 <- plm(idh ~ 
+                   individuals_using_the_internet_of_population + 
+                   rule + 
+                   enrollment_rate + 
+                   pcgdp,
+                 data = model_data,
+                 index = c("entity","year"),
+                 model = "random",
+                 random.method = 'amemiya')
+
+#Model results
+broom::tidy(aleatorio2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#estimates might be too low
+#Intercept is significant for a p-value < 0.1
+#individuals_using_internet is significant for a p-value < 0.05
+#rule is not significant 
+#enrollment_rate is significant for a p-value < 0.1
+#pcgdp is significant for a p-value < 0.05
+
+broom::glance(aleatorio2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#F statistic. Model is significant for a p-value < 0.05
+
+broom::tidy(aleatorio_log2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#better estimates 
+#Intercept is significant for a p-value < 0.05. It is negative now though
+#individuals_using_internet is significant for a p-value < 0.05
+#rule is not significant 
+#enrollment_rate is not significant 
+#gdp_growth is not significant 
+
+broom::glance(aleatorio_log2) %>%
+  dplyr::mutate_if(is.numeric, round, 5)
+#F statistic. Model is significant for a p-value < 0.05
+
+#Non tidy model results
+summary(aleatorio_log2)
+summary(aleatorio2)
+
+
+# Hausman test ------------------------------------------------------------
+phtest(fijo2, aleatorio2)
+#Should use random effects model
+
+phtest(fijo_log2, aleatorio_log2)
+#Should use random effects
+
+#el p-value es mayor a 5%, no se rechaza la Ho o rechazas la Ha,
+
+#si mi p-value es menor al 5%, entonces se deberia usar efectos fijos
+
+
 
 

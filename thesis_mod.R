@@ -39,7 +39,7 @@ idh_raw %>%
   #Drop the columns full of NAs
   select_if(~!all(is.na(.))) %>% 
   #Select the country column and the columns with the years of study
-  select(2, 23:30) %>%
+  select(2, 23:30) %>% 
   #Takes the dataset from wide to long format
   pivot_longer(2:9, 
                names_to = 'year', 
